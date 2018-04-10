@@ -17,43 +17,46 @@ I2C_BUS = 1	# 0=/dev/i2c-0, 1=/dev/i2c-1
 
 # The 2600 has 13 address pins, so we need to spread these over two banks
 # with the first 8 bits on the first bank and the remaining 5 on the second.
-ADDR_WRITE_BUS1 = 0x20 
-ADDR_WRITE_BANK1 = 0 # 0=MCP23017 Bank A, 1=MCP23017 Bank B, 2=MCP23008
+ADDR_WRITE_BUS1 = 0x20 # I2C bus address
+ADDR_WRITE_BANK1 = 0   # 0=MCP23017 Bank A, 1=MCP23017 Bank B, 2=MCP23008
 
-ADDR_WRITE_BUS2 = 0x20
-ADDR_WRITE_BANK2 = 1 # 0=MCP23017 Bank A, 1=MCP23017 Bank B, 2=MCP23008
+ADDR_WRITE_BUS2 = 0x20 # I2C bus address
+ADDR_WRITE_BANK2 = 1   # 0=MCP23017 Bank A, 1=MCP23017 Bank B, 2=MCP23008
 
 # The 2600 has 8 data pins, so we can use a single bank for that
-ADDR_READ_BUS = 0x24
-ADDR_READ_BANK = 0 # 0=MCP23017 Bank A, 1=MCP23017 Bank B, 2=MCP23008
+ADDR_READ_BUS = 0x24 # I2C bus address
+ADDR_READ_BANK = 0   # 0=MCP23017 Bank A, 1=MCP23017 Bank B, 2=MCP23008
 
 # I2C Register Constants for MCP23017 and MCP23008
 #
 # Taken from the following datasheets:
-# MCP23017: http://ww1.microchip.com/downloads/en/DeviceDoc/20001952C.pdf
-# MCP23008: http://ww1.microchip.com/downloads/en/DeviceDoc/21919e.pdf
+# MCP23017: http://ww1.microchip.com/downloads/en/DeviceDoc/20001952C.pdf (table 3-3)
+# MCP23008: http://ww1.microchip.com/downloads/en/DeviceDoc/21919e.pdf (table 1-3)
 I2C_REG_IODIR = [ 0x00, 0x01, 0x00 ]
 I2C_REG_GPIO = [ 0x12, 0x13, 0x09 ]
 I2C_IODIR_PORT_READ = 0xFF
 I2C_IODIR_PORT_WRITE = 0x00
 
+# Configure the MCP23017/MCP23008 chips for reading and writing
 def configBus(bus):
-    # Configure the write bus
+    # Write bus
     print("Configuring bus 0x{0:02x}, bank {1} for writing (reg: 0x{2:02x})" . format(ADDR_WRITE_BUS1, ADDR_WRITE_BANK1, I2C_REG_IODIR[ ADDR_WRITE_BANK1 ]))
     bus.write_byte_data(ADDR_WRITE_BUS1, I2C_REG_IODIR[ ADDR_WRITE_BANK1 ], I2C_IODIR_PORT_WRITE)
 
     print("Configuring bus 0x{0:02x}, bank {1} for writing (reg: 0x{2:02x})" . format(ADDR_WRITE_BUS2, ADDR_WRITE_BANK2, I2C_REG_IODIR[ ADDR_WRITE_BANK2 ]))
     bus.write_byte_data(ADDR_WRITE_BUS2, I2C_REG_IODIR[ ADDR_WRITE_BANK2 ], I2C_IODIR_PORT_WRITE)
 
-    # Configure the read bus
+    # Read bus
     print("Configuring bus 0x{0:02x}, bank {1} for reading (reg: 0x{2:02x})" . format(ADDR_READ_BUS, ADDR_READ_BANK, I2C_REG_IODIR[ ADDR_READ_BANK ]))
     bus.write_byte_data(ADDR_READ_BUS, I2C_REG_IODIR[ ADDR_READ_BANK ], I2C_IODIR_PORT_READ)
 
+# Set the address to read from the cartridge
 def setAddress(bus, address):
     bus.write_byte_data(ADDR_WRITE_BUS1, I2C_REG_GPIO[ ADDR_WRITE_BANK1 ], address & 0xFF)
     bus.write_byte_data(ADDR_WRITE_BUS2, I2C_REG_GPIO[ ADDR_WRITE_BANK2 ], address >> 8)
     time.sleep(ROM_DELAY)
 
+# Read a byte from the cartridge
 def readByte(bus, retry=0):
     try:
         return bus.read_byte_data(ADDR_READ_BUS, I2C_REG_GPIO[ ADDR_READ_BANK ])
@@ -63,6 +66,7 @@ def readByte(bus, retry=0):
         else:
             raise
 
+# Check the ROM for basic errors
 def checkRom(bus):
 
     print("Checking ROM...")
@@ -74,12 +78,13 @@ def checkRom(bus):
         byte = readByte(bus)
         bytes.append(byte)
 
-    if checkRomZeros(bytes) and checkRomOnes(bytes) and checkRomDuplicate(bytes):
-        print("ROM Checks Passed")
+    if checkRomZeros(bytes) and checkRomDuplicate(bytes):
+        print("ROM checks passed")
         return True
 
     return False
 
+# Check the ROM for all zeros
 def checkRomZeros(bytes):
     if bytes.count(0) == len(bytes):
         print("Error: all zeros returned, is cartridge inserted?")
@@ -87,13 +92,7 @@ def checkRomZeros(bytes):
 
     return True
 
-def checkRomOnes(bytes):
-    if bytes.count(0xFF) == len(bytes):
-        print("Error: all ones returned, wiring issue?")
-        return False
-
-    return True
-
+# Check the ROM for pairs of bytes with duplicate values
 def checkRomDuplicate(bytes):
     num_bytes = len(bytes)
     count = 0
@@ -139,3 +138,4 @@ if checkRom(bus):
     file.close()
 
 bus.close();
+
