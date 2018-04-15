@@ -49,15 +49,16 @@ Each chip will need to be given a separate I2C bus address so that we can
 read/write from the appropriately. This can be done by wiring the
 A0, A1, and A2 pins to either +5V or GND. 8 addresses are possible:
 
-Address | A0  | A1  | A2
-0x20    | GND | GND | GND
-0x21    | +5V | GND | GND
-0x22    | GND | +5V | GND
-0x23    | +5V | +5V | GND
-0x24    | GND | GND | +5V
-0x25    | +5V | GND | +5V
-0x26    | GND | +5V | +5V
-0x27    | +5V | +5V | +5V
+| Address | A0  | A1  | A2  |
+| ------- | --- | --- | --- |
+| 0x20    | GND | GND | GND |
+| 0x21    | +5V | GND | GND |
+| 0x22    | GND | +5V | GND |
+| 0x23    | +5V | +5V | GND |
+| 0x24    | GND | GND | +5V |
+| 0x25    | +5V | GND | +5V |
+| 0x26    | GND | +5V | +5V |
+| 0x27    | +5V | +5V | +5V |
 
 I utilized 2x MCP23017 chips and set them to addresses 0x20 and 0x24.
 
@@ -88,12 +89,12 @@ diagram of the cartridge PCB connector. Note the orientation of the cartridge's
 side label and top label text relative to the edge connector. +5V is on the
 label side of the cartridge at pin #23.
 
-Wire A0-A7 to the first MCP23017 or MCP23008 8-bit port.
+Wire A0-A7 in order to the first MCP23017 or MCP23008 8-bit port.
 
-Wire A8-A12 to the second MCP23017 or MCP23008 8-bit port. Note that A10 and
-A11 are out of order.
+Wire A8-A12 in order to the second MCP23017 or MCP23008 8-bit port. Note that
+A10 and A11 are swapped.
 
-Wire D1-D8 to the third MCP23017 or MCP23008 8-bit port.
+Wire D1-D8 in order to the third MCP23017 or MCP23008 8-bit port.
 
 +5V goes to +5V. GND and sGND go to GND.
 
