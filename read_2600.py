@@ -101,7 +101,7 @@ def bankSwitch(bus, address, rom_bank):
 def setAddress(bus, address):
     bus.write_byte_data(ADDR_WRITE_BUS1, I2C_REG_GPIO[ ADDR_WRITE_BANK1 ], address & 0xFF)
     bus.write_byte_data(ADDR_WRITE_BUS2, I2C_REG_GPIO[ ADDR_WRITE_BANK2 ], address >> 8)
-    time.sleep(ROM_DELAY)
+#    time.sleep(ROM_DELAY)
 
 # Read a byte from the cartridge
 def readByte(bus, retry=0):
@@ -114,6 +114,25 @@ def readByte(bus, retry=0):
             return readByte(bus, retry + 1)
         else:
             raise
+
+def readByteFast(bus, retry=0):
+    last_byte = None
+    byte_count = 0
+
+    while byte_count < 10:
+
+        byte = readByte(bus, retry)
+
+        if byte == last_byte:
+            byte_count += 1
+        else:
+            if last_byte != None:
+                print("Mismatch {0:x} {1:x}" . format(last_byte, byte))
+                time.sleep(ROM_DELAY)
+            last_byte = byte
+            byte_count = 0
+
+    return byte
 
 # Check the ROM for basic errors
 def checkRom(bus):
@@ -187,14 +206,14 @@ if checkRom(bus):
     for x in range(0, ROM_SIZE):
         bankSwitch(bus, x + ROM_OFFSET, ROM_BANK)
         setAddress(bus, realAddress(x + ROM_OFFSET))
-        byte = readByte(bus)
+        byte = readByteFast(bus)
         file.write(struct.pack('B', byte))
         sys.stdout.write("\rRead {0} of {1} bytes" . format(x + 1, ROM_SIZE));
         sys.stdout.flush()
 
     file.close()
 
-bus.close();
+    print("\nDone!")
 
-print("\nDone!")
+bus.close();
 
