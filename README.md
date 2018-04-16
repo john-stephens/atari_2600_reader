@@ -28,9 +28,12 @@ feet wet playing with I2C and the MCP23017 chip.
 
 ## Hardware
 
+![Hardware](img/hardware.png?raw=true "Hardware")
+
 * Raspberry Pi with I2C port enabled
 * 2x MCP23017 16-port or 3x MCP23008 8-port I/O expander chips
 * Atari 2600 24-pin Edge Connector
+* Atari 2600 Cartridge Port (Optional)
 
 ## Wiring
 
@@ -183,11 +186,11 @@ For example, here is how you can copy a 4KB ROM and output the data to
 python read_2600.py -s 4 -o test.rom
 ```
 
+If you see any "Mismatch" lines in your output, you may have a cartridge with
+a dirty or bad connector, which is causing bad bytes to be output.
+
 You can test your dump by using the Stella emulator. You should see the name of
 the game and the copyright year as the window title.
 
 ![Stella Example](img/stella_example.png?raw=true "Stella Example")
-
-If you see any "Mismatch" lines in your output, you may have a cartridge with
-a dirty or bad connector, which is causing bad bytes to be output.
 
