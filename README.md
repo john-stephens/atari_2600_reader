@@ -186,6 +186,8 @@ python read_2600.py -s 4 -o test.rom
 You can test your dump by using the Stella emulator. You should see the name of
 the game and the copyright year as the window title.
 
+![Stella Example](img/stella_example.png?raw=true "Stella Example")
+
 If you see any "Mismatch" lines in your output, you may have a cartridge with
 a dirty or bad connector, which is causing bad bytes to be output.
 
